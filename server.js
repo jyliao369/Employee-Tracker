@@ -17,7 +17,14 @@ const db = mysql.createConnection(
 
 // The next block of codes asks whether the user would to do one of these things:
 // View All Departments?", "View All Roles?", "View All Employees?", "Add Department?", "Add Role?", "Add Employee?", "Update Employee Role?"
-
+const startingPrompts = () => {
+    return inquire.prompt([{
+        name: 'databases',
+        type: 'list',
+        message: 'What would you like to do?',
+        choices: ['View all Departments', 'View all roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update Employee Role']
+    }])
+};
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
