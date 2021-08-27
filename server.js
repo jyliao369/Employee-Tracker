@@ -1,6 +1,10 @@
-const express = require('express');
+// Required Modules
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const express = require('express');
+
+const figlet = require('figlet');
+const cTable = require('console.table');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -28,15 +32,15 @@ db.connect(function (err) {
 // View All Departments", "View All Roles", "View All Employees", "Add Department", "Add Role", "Add Employee?", "Update Employee Role?"
 const startingPrompts = () => {
     return inquirer.prompt([{
-        name: 'database',
+        name: 'choice',
         type: 'list',
         message: 'What would you like to do?',
         choices: ['View all Departments', 'View all roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update Employee Role']
-    }])
-    .then(function(val) {
+    }]).then(function(val) {
+        // For future notes, 'val.action' is based on what inquirer where 'name:' is defined. If it was changed to another string it would be 'val.[w.e string]'
         switch (val.choice) {
-            case "View all Departments":
-                viewDepartments();
+            case ("View all Departments"):
+                viewDepts();
                 break;
             
             case "View all roles":
@@ -61,7 +65,7 @@ const startingPrompts = () => {
 
             case "Update Employee Role":
                 updateEmployee();
-                break;
+                break
         }   
     })
 };
@@ -69,19 +73,19 @@ const startingPrompts = () => {
 // These next couple blocks are code are the different choices you can pick
 // These are for viewing
 // For 'View all Departments'
-const viewDepartments = () => {
-    db.query("SELECT * FROM department", function (err, query) {
+const viewDepts = () => {
+    db.query("SELECT * FROM department", function (err, res) {
         // This basically states that if there was an error in the roles
         // Like if there was no data then we start over back at the prompts
         // asking the user what they would like to do next.
         if (err) throw err
-        console.table("SELECT * FROM department")
+        console.table(res)
         startingPrompts()
     })
 };
 // For 'View all Roles'
 const viewRoles = () => {
-    db.query('SELECT * FROM role', function (err, res) {
+    db.query('SELECT * FROM roles', function (err, res) {
         // This basically states that if there was an error in the roles
         // Like if there was no data then we start over back at the prompts
         // asking the user what they would like to do next.
@@ -92,7 +96,7 @@ const viewRoles = () => {
 };
 // For 'View all Employees'
 const viewEmployees = () => {
-    db.query('SELECT * FROM employee', function (err, res) {
+    db.query('SELECT * FROM employees', function (err, res) {
         // This basically states that if there was an error in the roles
         // Like if there was no data then we start over back at the prompts
         // asking the user what they would like to do next.
