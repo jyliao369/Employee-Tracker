@@ -107,17 +107,23 @@ const viewEmployees = () => {
     })
 };
 
+
 // These next couple blocks of code allo you to modify the such as add a department 
 // employees, or roles
 // For 'Add a Department'
 const addDepartment = () => {
-    inquirer.prompt([{
-        name: "Names",
-        type: "input",
-        message: "What deparment are you adding?"
-    }])
+    inquirer.prompt([
+        {
+            name: "Name",
+            type: "input",
+            message: "What deparment are you adding?"
+        }
+    ])
     .then(function(res) {
-        db.query('INSERT INTO `department` SET ?', {name: res.Names},
+        const query = "INSERT INTO department SET ?";
+        
+        // 'name' in this line of code is the title of the column in this name
+        db.query(query, {name: res.Name},
             function(err) {
                 if (err) throw err
                 console.table(res);
@@ -126,42 +132,85 @@ const addDepartment = () => {
         )
     })
 };
-
-// For 'Add a Role'
+// // For 'Add a Role'
 const addRole = () => {
-    inquirer.prompt([{
+    const query = `SELECT roles.title, roles.salary FROM roles`;
+    
+    db.query(query, function(err, res) {
+        
+        inquirer.prompt([
+            {
+                name: "Title",
+                type: "input",
+                message: "What is the name of the Role?"
+            },
+            {
+                name: "Salary",
+                type: "input",
+                message: "What is this role's Salary?"
+            }
+        ])
 
-    }])
-    .then(function(res) {
-        db.query('', {}),
-            function(err) {
-                if (err) throw err
-                console.table(res);
-                startingPrompts;
-        }
-    })
+        .then(function(res) {
+        // 'title' in this line of code is the title or the name of the columns in the tables
+            db.query(
+                "INSERT INTO roles SET ?", {
+                    title: res.Title, 
+                    salary: res.Salary
+                },
+                function(err) {
+                    if (err) throw err
+                    console.table(res);
+                    startingPrompts();
+                }
+            )
+        });
+
+    });
 };
-// For 'Add an Employee'
+// // For 'Add an Employee'
 const addEmployee = () => {
-    inquirer.prompt([{
+    const query = `SELECT employees.first_name, employees.last_name`;
 
-    }])
-    .then(function(res) {
-        db.query('', {}),
-            function (err) {
-                if(err) throw err
-                console.table(res);
-                startingPrompts;
-        }
-    })
+    db.query(query, function(err, res) {
+
+        inquirer.prompt([
+            {
+                name: "First_name",
+                type: "input",
+                message: "What is the new employee's FIRST name?"
+            },
+            {
+                name: "Last_name",
+                type: "input",
+                message: "What is the new employee's LAST name?"
+            }
+        ])
+
+        .then(function(res) {
+            db.query(
+                "INSERT INTO employees SET ?", {
+                    first_name: res.First_name,
+                    last_name: res.Last_name
+                },
+                function (err) {
+                    if (err) throw err
+                    console.table(res);
+                    startingPrompts();
+                }
+            )
+        });
+        
+    });
 };
 
-// For 'Update Employee Role'
-const updateEmployee = () => {
 
-};
+// // For 'Update Employee Role'
+// const updateEmployee = () => {
+
+// };
 
 
-// app.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`);
-//   });
+// // app.listen(PORT, () => {
+// //     console.log(`Server running on port ${PORT}`);
+// //   });
