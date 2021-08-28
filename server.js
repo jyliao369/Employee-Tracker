@@ -36,7 +36,8 @@ const startingPrompts = () => {
         type: 'list',
         message: 'What would you like to do?',
         choices: ['View all Departments', 'View all roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update Employee Role']
-    }]).then(function(val) {
+    }])
+    .then(function(val) {
         // For future notes, 'val.action' is based on what inquirer where 'name:' is defined. If it was changed to another string it would be 'val.[w.e string]'
         switch (val.choice) {
             case ("View all Departments"):
@@ -111,15 +112,12 @@ const viewEmployees = () => {
 // For 'Add a Department'
 const addDepartment = () => {
     inquirer.prompt([{
-        name: "addDepartment",
+        name: "Names",
         type: "input",
         message: "What deparment are you adding?"
     }])
     .then(function(res) {
-        const query = connection.query(
-            "", {
-                name: res.name
-            },
+        db.query('INSERT INTO `department` SET ?', {name: res.Names},
             function(err) {
                 if (err) throw err
                 console.table(res);
@@ -128,14 +126,36 @@ const addDepartment = () => {
         )
     })
 };
+
 // For 'Add a Role'
 const addRole = () => {
+    inquirer.prompt([{
 
+    }])
+    .then(function(res) {
+        db.query('', {}),
+            function(err) {
+                if (err) throw err
+                console.table(res);
+                startingPrompts;
+        }
+    })
 };
 // For 'Add an Employee'
 const addEmployee = () => {
+    inquirer.prompt([{
 
+    }])
+    .then(function(res) {
+        db.query('', {}),
+            function (err) {
+                if(err) throw err
+                console.table(res);
+                startingPrompts;
+        }
+    })
 };
+
 // For 'Update Employee Role'
 const updateEmployee = () => {
 
