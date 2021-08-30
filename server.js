@@ -298,10 +298,9 @@ const updateEmployee = () => {
 
     inquirer.prompt([
         {
-            name: "test-list",
-            type: "list",
-            message: "test",
-            choices: [1, 2, 3, 4, 5], 
+            name: "confirm",
+            type: "confirm",
+            message: "You sure your want to update?",
         },
         {
           name: "choice",
