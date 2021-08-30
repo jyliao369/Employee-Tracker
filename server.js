@@ -4,6 +4,7 @@ const inquirer = require('inquirer');
 
 const figlet = require('figlet');
 const cTable = require('console.table');
+const e = require('express');
 
 
 // Connecting to the database
@@ -137,7 +138,7 @@ const addDepartment = () => {
         {
             name: "Name",
             type: "input",
-            message: "What's the name of the deparment are you adding?"
+            message: "What's the name of the department are you adding?"
         },
     ])
     .then(function(res) {
@@ -154,33 +155,6 @@ const addDepartment = () => {
         );
     });
 };
-
-// // These are some functions that can be used to help with adding/updating employee.
-// // This will list all of the known roles that have been pre-submitted through the seeds sql file 
-// let roleArray = [];
-// const selectRole = () => {
-//     const query = "SELECT * FROM roles";
-//     db.query (query, function(err, res) {
-//         if (err) throw err
-//         for (let a = 0; a < res.length; a++) {
-//             roleArray.push(res[a].title);
-//         }
-//     })
-//     return roleArray;
-// };
-
-// // This will list all of the managers that have been pre-submitted through the seeds
-// let managerArray = [];
-// const selectManager = () => {
-//     const query = `SELECT first_name, last_name FROM employees WHERE manager_id IS NULL`;
-//     db.query(query, function(err, res) {
-//         if (err) throw err
-//         for (let b = 0; b < res.length; b++) {
-//             managerArray.push(res[b].first_name);
-//         }
-//     })
-//     return managerArray;
-// };
 
 // // For 'Add a Role'
 // // The parameters needed for this function are NAME OF ROLE, SALARY, DEPARTMENT FOR THE ROLE
@@ -264,62 +238,79 @@ const addEmployee = () => {
             choices: managersArray,
         }
     ]).then(function(res) {
-        const roleID = selectRole().indexOf(res.Role) + 1;
-        const managerID = selectManager().indexOf(res.Manager) + 1;
-        db.query("INSERT INTO employees SET ?", {
+        const roleID = rolesArray.indexOf(res.Role) + 1;
+        const managerID = managersArray.indexOf(res.Manager) + 1;
+
+        const newEmployee = {
             first_name: res.First_name,
             last_name: res.Last_name,
             manager_id: managerID,
-            role_idL: roleID
-        }, function (err) {
-            if (err) throw err
-            console.table(res)
-            startingPrompts()
+            role_id: roleID,
+        };
+
+        db.query("INSERT INTO employee SET ?", newEmployee, err => {
+            if (err) throw err;
+            startingPrompts();
         })
     })
 };
 
 
-
 // For 'Update Employee Role'
-// const updateEmployee = () => {
-//     let employeeArray = [];
-//     let roleArray = [];
-
-//     db.query(
-//         "SELECT first_name, last_name FROM employees",
-//         (err, results) => {
-//             results.map(employees =>
-//                 employeeArray.push(`${employees.first_name} ${employees.last_name}`)
-//             );
-//             return employeeArray;
-//         }
-//     );
+const updateEmployee = () => {
+    let employeeArr = [];
+    let roleArr = [];
     
-//     db.query(
-//         query, 
-//         (err, res) => {
+    // This code helps gather all of the employees. It grabs the first and last name
+    // of every employer since everyone is an employee
+    db.query(
+      "SELECT first_name, last_name FROM employee",
+      (err, results) => {
+        results.map(employee =>
+          employeeArr.push(`${employee.first_name} ${employee.last_name}`)
+        );
+        return employeeArr;
+      }
+    );
+    
+    // This block of is very similar to one up where we add a new employee
+    // It basically grabs everyrole in the roles table and turns it into an array
+    db.query(
+      "SELECT * FROM role ", (err, results) => {
+      if (err) throw err;
+      results.map(role => roleArr.push(`${role.title}`));
+      return roleArr;
+    })
 
+    inquirer.prompt([
+        {
+            name: "test-list",
+            type: "list",
+            message: "test",
+            choices: [1, 2, 3, 4, 5], 
+        },
+        {
+          name: "selection",
+          type: "list",
+          message: "Please select the employee to update",
+          choices: employeeArr,
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "what is the employee's new role?",
+            choices: roleArr,
+        },
+    ]).then(res =>{
+        const role_id = roleArr.indexOf(res.role) + 1;
+        const employee_id = employeeArr.indexOf(res.selection) + 1;
+        console.log(role_id);
+        console.log(employee_id);
+        
+        db.query (`UPDATE employee SET role_id= ${role_id} WHERE id= ${employee_id} `, (err) =>{
+          if(err) throw err;
+          startingPrompts();
+        })
+    })
+};
 
-//         if (err) throw err
-//         inquirer.prompt([
-//             {
-//                 name: "lastname",
-//                 type: "rawlist",
-//                 choices: function() {
-//                     let lastName = [];
-//                     for (let a = 0; a < res.length; a++) {
-//                         lastName.push(res[a].last_name);
-//                     }
-//                     return lastName;
-//                 },
-//                 message: "What is the Employee's last name?",
-//             }
-//         ])
-//     })
-// };
-
-
-// // // app.listen(PORT, () => {
-// // //     console.log(`Server running on port ${PORT}`);
-// // //   });
