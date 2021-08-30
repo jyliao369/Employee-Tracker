@@ -39,7 +39,6 @@
   ## Tests
   -- How can we test the application --
 
-  To test the application you will need a couple of modules installed:
   -- When running VS Code make sure the proper modules are installed using "npm i"
   -- Make sure that node.js is install as that is needed to run the application
   -- Make sure that you also have mysql installed as that allows the database to be created. it can be installed by using "npm i mysql" in command

@@ -157,6 +157,14 @@ const addDepartment = () => {
 // // For 'Add a Role'
 // // The parameters needed for this function are NAME OF ROLE, SALARY, DEPARTMENT FOR THE ROLE
 const addRole = () => {
+
+    let departmentArray = [];
+
+    db.query("SELECT * FROM department;", (err, results) => {
+        if (err) throw err;
+        results.map((department) => departmentArray.push(`${department.name}`));
+        return departmentArray;
+    });
     
     inquirer.prompt([
         {
@@ -169,14 +177,22 @@ const addRole = () => {
             type: "input",
             message: "What is this role's Salary?"
         },
+        {
+            name: "Department",
+            type: "list",
+            message: "What department does the role belong to?",
+            choices: departmentArray,
+        },
     ])
     .then(function(res) {
     // 'title' in this line of code is the title or the name of the columns in the tables
+        const departmentID = departmentArray.indexOf(res.Department) + 1;
         db.query(
             "INSERT INTO role SET ?", 
             {
                 title: res.Title, 
-                salary: res.Salary
+                salary: res.Salary,
+                department_id: departmentID
             },
             function(err) {
                 if (err) throw err
