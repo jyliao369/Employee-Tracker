@@ -2,9 +2,7 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
-const figlet = require('figlet');
 const cTable = require('console.table');
-const e = require('express');
 
 
 // Connecting to the database
@@ -190,16 +188,19 @@ const addRole = () => {
 };
 
 // // // // For 'Add an Employee'
-// // The parameters needed for this function are FIRST AND LAST NAME, ROLE AND MANAGER THEY WORK UNDER
 const addEmployee = () => {
 
+    // These arrays will hold onto pre-establisher roles and managers
+    // that can be used to select for new employees
     let managersArray = [];
     let rolesArray = [];
 
-    
+    // These grab the first and last names of the employee in the employee table
+    // the special thing is that names that have null or no manager id are selected
+    // as the null denotes someone who doesn't work under anyone.
     const query = "SELECT first_name, last_name FROM employee WHERE manager_id IS NULL";
     db.query(
-        "SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", 
+        query, 
         (err, results) => {
             results.map(manager => 
                 managersArray.push(`${manager.first_name} ${manager.last_name}`)
@@ -207,7 +208,9 @@ const addEmployee = () => {
             return managersArray;
         }
     );
-
+    
+    // This block of code will grab roles and in the role table and 
+    // turn into a array.
     db.query("SELECT * FROM role ", (err, results) => {
         if (err) throw err;
         results.map(role => rolesArray.push(`${role.title}`));
@@ -238,9 +241,15 @@ const addEmployee = () => {
             choices: managersArray,
         }
     ]).then(function(res) {
+        // These two lines of code will grab the ID numbers for the specific role and the
+        // id of the manager. These will be used later.
         const roleID = rolesArray.indexOf(res.Role) + 1;
         const managerID = managersArray.indexOf(res.Manager) + 1;
 
+        // This block of code creates a new object, in this case a new employee
+        // the employees parameters based on the users input and the role and managers selected
+        // The two variables above are used to finde the manager associated with the worker
+        // and the role ID given to that specific role.
         const newEmployee = {
             first_name: res.First_name,
             last_name: res.Last_name,
@@ -248,6 +257,8 @@ const addEmployee = () => {
             role_id: roleID,
         };
 
+        // Once the new employee is created, the object is inserted into the employee
+        // database with all of its attributes in the proper column
         db.query("INSERT INTO employee SET ?", newEmployee, err => {
             if (err) throw err;
             startingPrompts();
@@ -258,18 +269,21 @@ const addEmployee = () => {
 
 // For 'Update Employee Role'
 const updateEmployee = () => {
-    let employeeArr = [];
-    let roleArr = [];
+
+    // Like the two arrays above these arrays will hold onto pre-establisher roles and managers
+    // that can be used to update employees based on their roles
+    let employeesArray = [];
+    let rolesArray = [];
     
     // This code helps gather all of the employees. It grabs the first and last name
     // of every employer since everyone is an employee
     db.query(
       "SELECT first_name, last_name FROM employee",
       (err, results) => {
-        results.map(employee =>
-          employeeArr.push(`${employee.first_name} ${employee.last_name}`)
+        results.map(worker =>
+            employeesArray.push(`${worker.first_name} ${worker.last_name}`)
         );
-        return employeeArr;
+        return employeesArray;
       }
     );
     
@@ -278,8 +292,8 @@ const updateEmployee = () => {
     db.query(
       "SELECT * FROM role ", (err, results) => {
       if (err) throw err;
-      results.map(role => roleArr.push(`${role.title}`));
-      return roleArr;
+      results.map(role => rolesArray.push(`${role.title}`));
+      return rolesArray;
     })
 
     inquirer.prompt([
@@ -290,24 +304,26 @@ const updateEmployee = () => {
             choices: [1, 2, 3, 4, 5], 
         },
         {
-          name: "selection",
+          name: "choice",
           type: "list",
           message: "Please select the employee to update",
-          choices: employeeArr,
+          choices: employeesArray,
         },
         {
             name: "role",
             type: "list",
             message: "what is the employee's new role?",
-            choices: roleArr,
+            choices: rolesArray,
         },
     ]).then(res =>{
-        const role_id = roleArr.indexOf(res.role) + 1;
-        const employee_id = employeeArr.indexOf(res.selection) + 1;
-        console.log(role_id);
-        console.log(employee_id);
+        // These two lines of code will grab the ID numbers for the specific role and the
+        // id of the employer. These will be used later.
+        const roleID = rolesArray.indexOf(res.role) + 1;
+        const employeeID = employeesArray.indexOf(res.choice) + 1;
         
-        db.query (`UPDATE employee SET role_id= ${role_id} WHERE id= ${employee_id} `, (err) =>{
+        // The two variables above will be used here change the role id of a specific employee
+        // based on  the employee's ID.
+        db.query (`UPDATE employee SET role_id= ${roleID} WHERE id= ${employeeID} `, (err) =>{
           if(err) throw err;
           startingPrompts();
         })
